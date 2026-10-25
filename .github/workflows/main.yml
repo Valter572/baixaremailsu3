@@ -1,0 +1,39 @@
+name: Build Executavel
+
+on: [workflow_dispatch, push]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Gerar executavel
+        run: >
+          pyinstaller --onefile --noconsole --clean
+          --name Extrator
+          --hidden-import=win32timezone
+          --hidden-import=pythoncom
+          --hidden-import=pywintypes
+          main.py
+
+      - name: Guardar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: Extrator-windows
+          path: dist/Extrator.exe
